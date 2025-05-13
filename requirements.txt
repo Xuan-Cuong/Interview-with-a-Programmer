@@ -1,0 +1,6 @@
+Flask
+python-dotenv
+requests
+openai  # hoặc tên thư viện LLM bạn dùng
+# google-api-python-client # nếu dùng Google Custom Search
+# serpapi # nếu dùng SerpAPI

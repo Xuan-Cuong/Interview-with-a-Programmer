@@ -1,0 +1,604 @@
+/* Import Fonts (Removed @import here, linked in index.html HEAD) */
+/* Font Awesome is also linked in index.html HEAD */
+
+:root {
+  /* New Modern Colors */
+  --bg-color: #f8f9fc; /* Very light blue/grey background */
+  --primary: #6a11cb; /* Purple */
+  --secondary: #2575fc; /* Bright Blue */
+  --text-color: #1e1e2f; /* Dark desaturated text */
+  --subtext: #6c757d; /* Standard grey for secondary text/labels */
+  --white: #ffffff; /* Pure white */
+  --border-color: #dee2e6; /* Light grey border */
+
+  /* Derived/Kept colors for specific elements (icons, errors, success) */
+  --warning-color: #ffc107; /* Yellow - kept for warning icon */
+  --success-color: #28a745; /* Green - for success (score, submit button) */
+  --error-color: #dc3545; /* Red - for errors */
+  --info-color: #11c1e2; /* Cyan - kept for info icon (not currently used) */
+
+  /* Spacing & Radius - Using explicit values based on the new snippet */
+  --radius: 12px;
+  /* No explicit spacing variables, using rem directly */
+
+  /* Shadow */
+  --shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+  --shadow-focus: 0 0 0 0.25rem rgba(106, 17, 203, 0.25); /* Based on primary */
+
+  /* Fonts */
+  --font-title: 'Inter', sans-serif;
+  --font-body: 'Open Sans', sans-serif;
+  --font-code: 'Fira Code', monospace;
+}
+
+/* ------------------- BASE STYLES & LAYOUT ------------------- */
+
+body {
+  margin: 0;
+  font-family: var(--font-body);
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  display: flex;
+  justify-content: center;
+  padding: 2rem; /* Based on new snippet */
+  min-height: 100vh;
+  overflow-y: auto;
+  line-height: 1.6;
+}
+
+.container {
+  background-color: var(--white);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 2.5rem; /* Based on new snippet */
+  max-width: 900px;
+  width: 100%;
+  /* margin-top: removed, using padding on body instead */
+  border: 1px solid var(--border-color);
+  overflow: hidden;
+  /* Animation - Keeping existing */
+  animation: fadeInScale 0.8s ease-out;
+}
+
+@keyframes fadeInScale {
+  from { opacity: 0; transform: translateY(20px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* ------------------- TYPOGRAPHY & HEADERS ------------------- */
+
+header {
+  text-align: center;
+  margin-bottom: 2rem; /* Based on new snippet */
+  color: var(--text-color);
+}
+
+header h1 {
+  font-family: var(--font-title);
+  margin: 0 0 0.5rem 0; /* Adjusted margin */
+  font-size: 2.8rem; /* Based on new snippet */
+  letter-spacing: -0.5px;
+  font-weight: 700;
+  text-transform: none;
+  /* New Gradient based on new snippet */
+  background: linear-gradient(to right, var(--primary), var(--secondary));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+header p {
+    margin: 0;
+    font-size: 1.1rem; /* Based on new snippet */
+    color: var(--subtext); /* Using new subtext color */
+    font-family: var(--font-body);
+}
+
+h2, .result-box h3 {
+    font-family: var(--font-title);
+    color: var(--text-color);
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 10px;
+    margin-top: 0;
+    margin-bottom: 1rem; /* Adjusted margin */
+    display: flex;
+    align-items: center;
+    font-size: 1.5rem; /* Based on new snippet */
+    font-weight: 700;
+    gap: 0.5rem; /* Gap for icon */
+}
+
+/* Input fields, textarea, chat area, research report (Code/Monospace font) */
+select, input[type="text"], textarea, .chat-area, #research-report-content {
+    font-family: var(--font-code);
+    font-size: 0.95rem; /* Based on new snippet */
+}
+
+/* Buttons - Using Inter for prominent buttons */
+.agent-button, #start-interview-btn, #start-research-btn, #submit-answer-btn {
+    font-family: var(--font-title); /* Using new font variable */
+    font-weight: 600;
+    text-transform: none; /* Keeping lowercase/title case */
+}
+
+/* Ensure icons don't interfere with other fonts */
+.fas {
+    font-family: "Font Awesome 6 Free";
+}
+
+/* ------------------- AGENT SELECTOR ------------------- */
+
+.agent-selector {
+    display: flex;
+    justify-content: center; /* Based on new snippet */
+    gap: 1rem; /* Based on new snippet */
+    margin-bottom: 2rem; /* Based on new snippet */
+    flex-wrap: wrap;
+    /* Removed border/radius from container */
+    /* overflow: hidden; width: fit-content; margin-left/right: auto; */
+}
+
+.agent-button {
+    flex-grow: 0; /* Changed from 1 */
+    text-align: center;
+    background-color: var(--white); /* Using new white variable */
+    color: var(--primary); /* Using new primary variable */
+    border: 1px solid var(--primary); /* Border based on new snippet */
+    padding: 0.75rem 1.5rem; /* Based on new snippet */
+    border-radius: var(--radius); /* Using new radius variable */
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem; /* Based on new snippet */
+    box-shadow: none;
+    /* Removed border-right */
+}
+/* Removed last-child border rule */
+
+
+/* Style for the ACTIVE agent button */
+.agent-button.active-mode-button {
+     /* New Gradient based on new snippet */
+     background: linear-gradient(to right, var(--primary), var(--secondary));
+     color: white;
+     border-color: transparent; /* No border when active */
+     box-shadow: var(--shadow); /* Using new shadow variable */
+     /* Removed z-index, position */
+}
+/* Removed active + sibling border rule */
+
+
+/* Hover state for ANY button - Matching active style more closely */
+.agent-button:hover {
+     /* New Gradient based on new snippet */
+     background: linear-gradient(to right, var(--primary), var(--secondary));
+     color: white;
+     border-color: transparent;
+     box-shadow: var(--shadow);
+     transform: none; /* Remove transform on simple hover */
+}
+
+/* Hover state specifically for the ACTIVE button - Slightly more elevated effect */
+.agent-button.active-mode-button:hover {
+     box-shadow: 0 7px 14px rgba(50, 50, 93, 0.1), 0 3px 6px rgba(0, 0, 0, 0.08); /* Slightly stronger shadow on hover */
+     transform: translateY(-1px);
+}
+
+
+.agent-button:active {
+    transform: translateY(0);
+    box-shadow: none;
+}
+
+/* ------------------- SECTION STYLES ------------------- */
+
+.agent-section {
+    background-color: var(--white); /* Using new white variable */
+    padding: 1.5rem; /* Based on new snippet */
+    border-radius: var(--radius); /* Using new radius variable */
+    margin-bottom: 1.5rem; /* Based on new snippet */
+    border: 1px solid var(--border-color); /* Using new border color */
+    /* box-shadow: removed as per new snippet */
+    animation: sectionSlideIn 0.6s ease-out forwards;
+    opacity: 0;
+    transform: translateY(20px);
+}
+
+@keyframes sectionSlideIn {
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.section-icon {
+    color: var(--warning-color); /* Kept warning color for icon */
+    /* margin-right handled by h2 gap */
+}
+
+
+.interview-setup, .research-setup {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem; /* Based on new snippet/input-group gap */
+}
+
+.input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem; /* Based on new snippet */
+    margin-bottom: 1rem; /* Based on new snippet */
+}
+
+label {
+    font-weight: 600;
+    color: var(--subtext); /* Using new subtext color */
+    font-size: 1rem;
+    margin-bottom: 0; /* Gap handled by input-group */
+    font-family: var(--font-body);
+}
+
+select, input[type="text"], textarea {
+    padding: 0.75rem; /* Based on new snippet */
+    border: 1px solid var(--border-color); /* Using new border color */
+    border-radius: var(--radius); /* Using new radius variable */
+    background-color: var(--white); /* Using new white variable */
+    color: var(--text-color); /* Using new text color */
+    transition: all 0.2s ease;
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05);
+    /* Style select arrow */
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    padding-right: 30px;
+    /* Update Base64 arrow color to new subtext */
+    background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%236c757d%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200%20-13-5.4H18.4c-6.5%200-12.1%203.2-15.6%208.1-3.6%204.9-3.9%2010.6-1%2015.8l128%20127.9c3.6%203.6%208%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2085.1a17.6%2017.6%200%200%200%200-24.7z%22%2F%3E%3C%2Fsvg%3E');
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    background-size: 12px;
+}
+
+select:focus, input[type="text"]:focus, textarea:focus {
+    outline: none;
+    border-color: var(--primary); /* Use new primary for border focus */
+    box-shadow: var(--shadow-focus); /* Use new focus shadow */
+    background-color: white; /* Ensure white background on focus */
+}
+select:focus {
+    /* Update Base64 arrow color to new primary on focus */
+     background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%236a11cb%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200%20-13-5.4H18.4c-6.5%200-12.1%203.2-15.6%208.1-3.6%204.9-3.9%2010.6-1%2015.8l128%20127.9c3.6%203.6%208%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2085.1a17.6%2017.6%200%200%200%200-24.7z%22%2F%3E%3C%2Fsvg%3E');
+}
+
+
+textarea {
+    resize: vertical;
+    min-height: 80px;
+}
+
+button { /* General button style - moved from specific buttons */
+  font-family: var(--font-title);
+  font-weight: 600;
+  padding: 0.75rem 1.5rem; /* Based on new snippet */
+  border: none;
+  border-radius: var(--radius); /* Using new radius variable */
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem; /* Based on new snippet */
+  transition: all 0.3s ease;
+}
+
+
+#start-interview-btn, #start-research-btn {
+     /* New Gradient based on new snippet */
+     background: linear-gradient(to right, var(--primary), var(--secondary));
+     color: white;
+     box-shadow: var(--shadow); /* Using new shadow variable */
+}
+
+#start-interview-btn:hover, #start-research-btn:hover {
+    box-shadow: 0 7px 14px rgba(50, 50, 93, 0.1), 0 3px 6px rgba(0, 0, 0, 0.08); /* Slightly stronger shadow on hover */
+    transform: translateY(-1px);
+}
+
+#start-interview-btn:active, #start-research-btn:active {
+    transform: translateY(0);
+    box-shadow: none;
+}
+
+#submit-answer-btn {
+    background-color: var(--success-color); /* Using success color */
+    color: white;
+    box-shadow: var(--shadow); /* Using new shadow variable */
+}
+#submit-answer-btn:hover {
+     background-color: #218838; /* Darker green on hover */
+     box-shadow: 0 7px 14px rgba(50, 50, 93, 0.1), 0 3px 6px rgba(0, 0, 0, 0.08);
+     transform: translateY(-1px);
+}
+#submit-answer-btn:active {
+     transform: translateY(0);
+     box-shadow: none;
+}
+
+
+button:disabled {
+    background-color: #e9ecef;
+    color: #adb5bd;
+    cursor: not-allowed;
+    box-shadow: none;
+}
+
+/* ------------------- INTERVIEW/RESEARCH ACTIVE ------------------- */
+
+.interview-active {
+     margin-top: 1.5rem; /* Align with section padding */
+     display: flex;
+     flex-direction: column;
+     gap: 1rem; /* Spacing between elements */
+}
+
+.progress-bar {
+    width: 100%;
+    height: 8px;
+    background-color: var(--border-color);
+    border-radius: 4px;
+    overflow: hidden;
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.progress-fill {
+    height: 100%;
+    width: 0%;
+    /* Gradient based on success and secondary color */
+    background: linear-gradient(to right, var(--success-color), var(--secondary));
+    border-radius: 4px;
+    transition: width 0.5s ease-in-out;
+}
+
+#question-count {
+    text-align: center;
+    color: var(--subtext); /* Using new subtext color */
+    font-weight: 600;
+    font-size: 1rem;
+    font-family: var(--font-body);
+}
+
+.chat-area {
+    /* Removed border, padding, background, flex properties from wrapper */
+    margin-top: 1rem; /* Based on new snippet */
+    padding: 1rem; /* Based on new snippet */
+    background-color: var(--bg-color); /* Using new bg color */
+    border-radius: var(--radius); /* Using new radius */
+    max-height: 300px; /* Based on new snippet */
+    overflow-y: auto;
+    line-height: 1.7;
+    font-family: var(--font-code); /* Using new font variable */
+}
+
+/* Custom Scrollbar - Keeping existing */
+.chat-area::-webkit-scrollbar { width: 8px; }
+.chat-area::-webkit-scrollbar-track { background: var(--border-color); border-radius: 10px; }
+.chat-area::-webkit-scrollbar-thumb { background: #cccccc; border-radius: 10px; }
+.chat-area::-webkit-scrollbar-thumb:hover { background: #999999; }
+
+
+/* Container for chat messages */
+#interview-log {
+    display: flex;
+    flex-direction: column;
+    gap: 10px; /* Space between messages */
+}
+
+#interview-log > div {
+    margin-bottom: 0; /* Handled by gap */
+    padding: 10px;
+    border-radius: var(--radius); /* Using new radius variable */
+    word-wrap: break-word;
+    opacity: 0;
+    transform: translateY(10px);
+    animation: messageFadeIn 0.4s ease-out forwards;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05); /* Keep subtle shadow */
+    font-family: var(--font-code); /* Ensure chat messages use Code font */
+    font-size: 0.9em; /* Slightly smaller for monospace */
+}
+
+/* Style for rendered Markdown bold */
+#interview-log strong {
+    color: var(--text-color); /* Or a slightly different color if needed */
+    font-weight: 700; /* Ensure bold */
+}
+
+
+#interview-log > div:nth-child(n+2) { animation-delay: calc(var(--message-index, 0) * 0.08s); }
+
+@keyframes messageFadeIn {
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Chat message styles based on new color palette */
+.chat-question {
+    /* Light tint of primary color with primary left border */
+    background-color: #eef; /* Light purple tint */
+    border-left: 4px solid var(--primary);
+    color: var(--text-color);
+}
+
+.chat-answer {
+     /* Light tint of a blue/success color with success right border */
+     background-color: #f0f4ff; /* Light blue tint */
+     border-right: 4px solid var(--success-color);
+     text-align: right;
+     color: var(--text-color);
+}
+/* Remove margin from paragraph inside chat answer */
+.chat-answer p { margin: 0;}
+
+.chat-feedback {
+    /* Existing yellow background with warning left border */
+    background-color: #fff8e1;
+    border-left: 4px solid var(--warning-color);
+    color: var(--text-color);
+    font-style: italic;
+    font-size: 0.9em;
+    font-family: var(--font-body); /* Feedback might read better in body font */
+}
+/* Style for rendered Markdown bold inside feedback */
+.chat-feedback strong {
+     color: inherit; /* Use parent color */
+     font-weight: 700;
+}
+
+
+.user-input-area {
+    display: flex;
+    gap: 10px;
+    padding-top: 1rem; /* Based on spacing */
+    border-top: 1px solid var(--border-color); /* Using new border color */
+    align-items: flex-end;
+    width: 100%;
+}
+
+.user-input-area textarea {
+    flex-grow: 1;
+    min-height: 50px;
+    max-height: 120px;
+    height: auto;
+    overflow-y: auto;
+    padding: 0.5rem; /* Adjusted padding */
+}
+
+.user-input-area button {
+    flex-shrink: 0;
+    height: 50px; /* Fixed height */
+    padding: 0 15px;
+}
+
+
+/* ------------------- RESULTS & REPORT ------------------- */
+
+.result-box {
+    margin-top: 1.5rem; /* Align with section padding */
+    padding: 1.5rem; /* Based on new snippet */
+    background-color: var(--white); /* Using new white variable */
+    border: 1px solid var(--border-color); /* Using new border color */
+    border-radius: var(--radius); /* Using new radius variable */
+    color: var(--text-color); /* Using new text color */
+    /* box-shadow: removed as per new snippet */
+    animation: sectionSlideIn 0.6s ease-out forwards;
+    opacity: 0;
+    transform: translateY(20px);
+}
+
+.result-box h3 {
+    margin-top: 0;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 10px;
+    margin-bottom: 1rem; /* Adjusted margin */
+    display: flex;
+    align-items: center;
+    gap: 10px; /* Gap for icon */
+}
+
+#final-summary {
+    margin-bottom: 1rem; /* Based on spacing */
+    line-height: 1.6;
+    color: var(--subtext); /* Using new subtext color */
+    font-family: var(--font-body); /* Use body font for summary */
+}
+
+#final-score {
+    font-size: 1.6em;
+    font-weight: bold;
+    color: var(--success-color); /* Using success color */
+    text-align: center;
+    text-shadow: 1px 1px 2px rgba(40, 167, 69, 0.3); /* Shadow based on success color */
+    margin-top: 1rem; /* Based on spacing */
+    font-family: var(--font-title); /* Use title font for prominent score */
+}
+
+#research-report-content {
+     /* No need for white-space: pre-wrap or word-wrap: break-word; Marked handles paragraphs */
+     line-height: 1.7;
+     color: var(--text-color); /* Using new text color */
+     padding: 1rem; /* Based on spacing */
+     background-color: var(--bg-color); /* Using new bg color */
+     border-radius: var(--radius); /* Using new radius variable */
+     border: 1px dashed var(--border-color); /* Using new border color */
+     box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05); /* Keep subtle shadow */
+     /* Removed font-family as Marked output will be standard HTML */
+}
+
+/* Style for elements generated by Marked (like p, strong, li, etc.) within report */
+#research-report-content p,
+#research-report-content strong,
+#research-report-content li,
+#research-report-content code {
+     font-family: var(--font-code); /* Apply monospace to text content */
+     font-size: 0.95rem;
+}
+#research-report-content strong {
+    font-weight: 700;
+}
+#research-report-content code {
+    background-color: rgba(0, 0, 0, 0.05);
+    padding: 2px 4px;
+    border-radius: 4px;
+}
+#research-report-content ul,
+#research-report-content ol {
+    padding-left: 20px;
+    margin-bottom: 1em;
+}
+
+
+/* ------------------- UTILITIES & FEEDBACK ------------------- */
+
+.loading-indicator {
+    text-align: center;
+    color: var(--primary); /* Using new primary color */
+    font-size: 1.4em;
+    margin-bottom: 1rem; /* Based on spacing */
+    animation: loadingPulse 1.5s infinite ease-in-out;
+    font-family: var(--font-body); /* Use body font for loading text */
+}
+@keyframes loadingPulse {
+    0% { opacity: 0.7; }
+    50% { opacity: 1; }
+    100% { opacity: 0.7; }
+}
+
+
+.error-box {
+    margin-top: 1.5rem; /* Align with section padding */
+    padding: 1rem; /* Based on spacing */
+    background-color: #f8d7da; /* Light red background */
+    border: 1px solid var(--error-color); /* Using new error color */
+    border-radius: var(--radius); /* Using new radius variable */
+    color: var(--error-color); /* Using new error color */
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    box-shadow: 0 2px 10px rgba(220, 53, 69, 0.2); /* Shadow based on new error color */
+    animation: errorShake 0.5s ease-in-out, sectionSlideIn 0.6s ease-out forwards;
+    opacity: 0;
+    transform: translateY(20px);
+    font-family: var(--font-body); /* Use body font for error text */
+}
+
+@keyframes errorShake {
+    0%, 100% { transform: translateX(0); }
+    25%, 75% { transform: translateX(-5px); }
+    50% { transform: translateX(5px); }
+}
+
+
+.hidden {
+    display: none;
+}
+
+::placeholder {
+  color: var(--subtext); /* Using new subtext color */
+  opacity: 0.8;
+  font-family: var(--font-code); /* Ensure placeholder uses Code font in inputs */
+}

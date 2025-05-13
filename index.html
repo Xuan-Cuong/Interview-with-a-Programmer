@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interview with a Programmer</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- Font Awesome cho icon -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- Thêm thư viện Font (Inter cho tiêu đề, Open Sans cho body, Fira Code cho monospace) -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Open+Sans:wght@400;600;700&family=Fira+Code:wght@400;500;600&display=swap" rel="stylesheet">
+    <!-- Thêm thư viện Marked.js để render Markdown (cho **text**) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/12.0.2/marked.min.js"></script>
+</head>
+<body>
+
+    <div class="container">
+        <header>
+            <h1>Interview with a Programmer</h1>
+            <p>Chọn chế độ bạn muốn tương tác</p>
+        </header>
+
+        <div class="agent-selector">
+            <!-- Icon mũi tên cho Phỏng vấn -->
+            <button class="agent-button" data-agent="interview"><i class="fas fa-arrow-right"></i> Phỏng vấn Lập trình viên</button>
+            <!-- Icon kính lúp cho Nghiên cứu -->
+            <button class="agent-button" data-agent="research"><i class="fas fa-search"></i> Nghiên cứu Thông tin</button>
+        </div>
+
+        <div id="interview-section" class="agent-section hidden">
+            <!-- Icon mũi tên vàng cho tiêu đề section -->
+            <h2><i class="fas fa-chevron-right section-icon"></i> Phỏng vấn Lập trình viên</h2>
+            <div class="interview-setup">
+                <label for="interview-topic">Chọn hoặc nhập chủ đề:</label>
+                <div class="input-group">
+                    <select id="interview-topic">
+                        <option value="Lập trình Web Frontend">Lập trình Web Frontend</option>
+                        <option value="Python Backend Development">Python Backend Development</option>
+                        <option value="Mạng Máy tính Cơ bản">Mạng Máy tính Cơ bản</option>
+                        <option value="Lập trình Mobile (Android/iOS)">Lập trình Mobile (Android/iOS)</option>
+                        <option value="IoT (Internet of Things)">IoT (Internet of Things)</option>
+                        <option value="Tư duy thuật toán (Data Structures & Algorithms)">Tư duy thuật toán (Data Structures & Algorithms)</option>
+                        <option value="Nhập chủ đề khác">Nhập chủ đề khác...</option>
+                    </select>
+                    <input type="text" id="custom-topic" class="hidden" placeholder="Nhập chủ đề tùy chỉnh...">
+                </div>
+                <!-- Icon mũi tên phải cho nút Bắt đầu -->
+                <button id="start-interview-btn"><i class="fas fa-play"></i> Bắt đầu Phỏng vấn</button>
+            </div>
+
+            <div class="interview-active hidden">
+                <div class="progress-bar">
+                    <div class="progress-fill"></div>
+                </div>
+                <p id="question-count">Câu hỏi: 0/10</p>
+                <div class="chat-area">
+                     <div id="interview-log">
+                         <!-- Questions, answers, feedback will be appended here -->
+                     </div>
+                </div>
+                 <div class="user-input-area">
+                     <textarea id="user-answer" placeholder="Nhập câu trả lời của bạn..."></textarea>
+                     <!-- Icon máy bay giấy cho nút Gửi -->
+                     <button id="submit-answer-btn"><i class="fas fa-paper-plane"></i> Gửi</button>
+                 </div>
+                <div id="interview-result" class="result-box hidden">
+                    <h3><i class="fas fa-award"></i> Kết quả Phỏng vấn</h3>
+                    <div id="final-summary"></div>
+                    <div id="final-score"></div>
+                </div>
+            </div>
+        </div>
+
+        <div id="research-section" class="agent-section hidden">
+            <!-- Icon nghiên cứu cho tiêu đề section -->
+            <h2><i class="fas fa-flask section-icon"></i> Nghiên cứu Thông tin</h2>
+            <div class="research-setup">
+                <label for="research-topic">Nhập chủ đề nghiên cứu:</label>
+                <div class="input-group">
+                    <input type="text" id="research-topic" placeholder="Ví dụ: Ứng dụng AI tại Việt Nam">
+                </div>
+                 <!-- Icon nghiên cứu cho nút Bắt đầu -->
+                <button id="start-research-btn"><i class="fas fa-flask"></i> Bắt đầu Nghiên cứu</button>
+            </div>
+            <div id="research-result" class="result-box hidden">
+                 <div class="loading-indicator hidden">
+                     <i class="fas fa-spinner fa-spin"></i> Đang xử lý...
+                 </div>
+                 <h3><i class="fas fa-file-alt"></i> Báo cáo Nghiên cứu</h3>
+                 <div id="research-report-content">
+                     <!-- Research report will be displayed here -->
+                 </div>
+            </div>
+        </div>
+
+        <div id="error-message" class="error-box hidden">
+             <i class="fas fa-exclamation-triangle"></i> <span id="error-text"></span>
+        </div>
+
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
