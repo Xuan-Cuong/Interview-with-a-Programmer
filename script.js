@@ -10,7 +10,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const researchResult = researchSection.querySelector('#research-result');
 
     const interviewTopicSelect = document.getElementById('interview-topic');
-    const customTopicInput = document.getElementById('custom-topic');
+    const customTopicInput = document.getElementById('custom-topic'); 
     const startInterviewBtn = document.getElementById('start-interview-btn');
     const questionCount = document.getElementById('question-count');
     const progressBarFill = interviewActive.querySelector('.progress-fill');

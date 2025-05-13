@@ -410,7 +410,7 @@ def perform_research():
 
     # --- AI Research Simulation ---
     # The AI doesn't browse the web in real-time via this API.
-    # It uses its training data to summarize information it knows.
+    # It uses its training data to summarize information it knows. 
     # To simulate 'finding information', we ask it to act as a researcher.
     # Request Markdown formatting in the prompt
     research_prompt = f"""
