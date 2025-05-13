@@ -114,7 +114,7 @@ select, input[type="text"], textarea, .chat-area, #research-report-content {
 }
 
 /* Buttons - Using Inter for prominent buttons */
-.agent-button, #start-interview-btn, #start-research-btn, #submit-answer-btn {
+.agent-button, #start-interview-btn, #start-research-btn, #submit-answer-btn, #voice-input-btn {
     font-family: var(--font-title); /* Using new font variable */
     font-weight: 600;
     text-transform: none; /* Keeping lowercase/title case */
@@ -320,6 +320,43 @@ button { /* General button style - moved from specific buttons */
      box-shadow: none;
 }
 
+/* Style for the new voice input button */
+#voice-input-btn {
+    background-color: var(--secondary); /* Use secondary color */
+    color: white;
+    box-shadow: var(--shadow);
+}
+
+#voice-input-btn:hover {
+     background-color: #1a5ecf; /* Darker blue on hover */
+     box-shadow: 0 7px 14px rgba(50, 50, 93, 0.1), 0 3px 6px rgba(0, 0, 0, 0.08);
+     transform: translateY(-1px);
+}
+
+ #voice-input-btn:active {
+     transform: translateY(0);
+     box-shadow: none;
+ }
+
+
+/* Style when actively recording */
+#voice-input-btn.recording {
+    background-color: var(--error-color); /* Red color */
+    color: white;
+    animation: pulseRecording 1.5s infinite ease-in-out; /* Add a pulse animation */
+}
+#voice-input-btn.recording:hover {
+     background-color: #c82333; /* Darker red on hover */
+     box-shadow: 0 7px 14px rgba(50, 50, 93, 0.1), 0 3px 6px rgba(0, 0, 0, 0.08);
+     transform: translateY(-1px);
+}
+
+@keyframes pulseRecording {
+    0% { box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.4); }
+    70% { box-shadow: 0 0 0 10px rgba(220, 53, 69, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(220, 53, 69, 0); }
+}
+
 
 button:disabled {
     background-color: #e9ecef;
@@ -454,7 +491,7 @@ button:disabled {
     gap: 10px;
     padding-top: 1rem; /* Based on spacing */
     border-top: 1px solid var(--border-color); /* Using new border color */
-    align-items: flex-end;
+    align-items: flex-end; /* Align items at the bottom */
     width: 100%;
 }
 
@@ -468,7 +505,7 @@ button:disabled {
 }
 
 .user-input-area button {
-    flex-shrink: 0;
+    flex-shrink: 0; /* Ensure buttons don't shrink */
     height: 50px; /* Fixed height */
     padding: 0 15px;
 }

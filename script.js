@@ -16,6 +16,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const progressBarFill = interviewActive.querySelector('.progress-fill');
     const interviewLog = document.getElementById('interview-log');
     const userAnswerTextarea = document.getElementById('user-answer');
+    const voiceInputBtn = document.getElementById('voice-input-btn'); // Get the new voice input button
     const submitAnswerBtn = document.getElementById('submit-answer-btn');
     const interviewResultDiv = document.getElementById('interview-result');
     const finalSummaryDiv = document.getElementById('final-summary');
@@ -35,6 +36,86 @@ document.addEventListener('DOMContentLoaded', () => {
     let totalQuestions = 10;
     let messageIndex = 0; // Counter for message animation delay
 
+    // --- Speech Recognition Setup ---
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    let speechRecognition = null;
+    let isRecording = false;
+
+    if (SpeechRecognition) {
+        speechRecognition = new SpeechRecognition();
+        speechRecognition.lang = 'vi-VN'; // Set language to Vietnamese
+        speechRecognition.continuous = false; // Listen until a pause is detected or stop() is called
+        speechRecognition.interimResults = false; // Only return final result
+
+        speechRecognition.onstart = () => {
+            isRecording = true;
+            voiceInputBtn.classList.add('recording'); // Add a CSS class for styling
+            voiceInputBtn.innerHTML = '<i class="fas fa-stop"></i> Dừng ghi'; // Change button text/icon
+            userAnswerTextarea.placeholder = 'Đang nghe... Hãy nói câu trả lời của bạn.';
+             userAnswerTextarea.disabled = true; // Disable typing while recording
+             submitAnswerBtn.disabled = true; // Disable send button while recording
+             hideError(); // Hide any previous errors
+        };
+
+        speechRecognition.onresult = (event) => {
+            const lastResult = event.results[event.results.length - 1];
+            const transcript = lastResult[0].transcript;
+            userAnswerTextarea.value = transcript; // Put transcribed text into textarea
+        };
+
+        speechRecognition.onerror = (event) => {
+            console.error('Speech recognition error:', event.error);
+            let errorMsg = 'Lỗi ghi âm.';
+            if (event.error === 'no-speech') {
+                errorMsg = 'Không nghe thấy giọng nói.';
+            } else if (event.error === 'not-allowed') {
+                 errorMsg = 'Vui lòng cho phép truy cập microphone để sử dụng tính năng ghi âm.';
+                 voiceInputBtn.disabled = true; // Disable button permanently if permission denied
+            } else if (event.error === 'network') {
+                 errorMsg = 'Lỗi mạng khi ghi âm.';
+            } else if (event.error === 'abort') {
+                 // User clicked stop, not an error
+                 errorMsg = ''; // Clear error message
+            }
+             if (errorMsg) displayError(errorMsg); // Show error to user if any
+
+        };
+
+        speechRecognition.onend = () => {
+            isRecording = false;
+            voiceInputBtn.classList.remove('recording');
+            voiceInputBtn.innerHTML = '<i class="fas fa-microphone"></i> Ghi âm'; // Reset button text/icon
+            userAnswerTextarea.placeholder = 'Nhập câu trả lời của bạn...'; // Reset placeholder
+            userAnswerTextarea.disabled = false; // Re-enable typing
+            submitAnswerBtn.disabled = false; // Re-enable send button
+             // If text was transcribed, automatically focus textarea for review/edit
+             if (userAnswerTextarea.value) {
+                 userAnswerTextarea.focus();
+             }
+        };
+
+        // Add event listener to the voice input button
+        voiceInputBtn.addEventListener('click', () => {
+            if (isRecording) {
+                speechRecognition.stop(); // Stop recording
+            } else {
+                // Clear previous text before starting new recording
+                userAnswerTextarea.value = '';
+                speechRecognition.start(); // Start recording
+            }
+        });
+
+    } else {
+        // Hide the voice input button if not supported by the browser
+        if (voiceInputBtn) {
+             voiceInputBtn.style.display = 'none';
+             console.warn('Web Speech API not supported in this browser.');
+             // Optionally inform the user via displayError on page load
+             // displayError('Tính năng nhập giọng nói không được hỗ trợ trên trình duyệt này.');
+        }
+    }
+
+
     // --- Helper Functions ---
     function showSection(sectionElement) {
         document.querySelectorAll('.agent-section').forEach(sec => sec.classList.add('hidden'));
@@ -48,8 +129,14 @@ document.addEventListener('DOMContentLoaded', () => {
             researchTopicInput.disabled = isLoading;
         } else if (section === 'interview') {
              startInterviewBtn.disabled = isLoading;
-             submitAnswerBtn.disabled = isLoading;
-             userAnswerTextarea.disabled = isLoading;
+             submitAnswerBtn.disabled = isLoading || isRecording; // Also disable if recording is active
+             userAnswerTextarea.disabled = isLoading || isRecording; // Also disable if recording is active
+             if (voiceInputBtn) {
+                 // Disable voice button only when fetching (not just loading text/feedback)
+                 // Or keep enabled if user might stop recording while waiting for AI?
+                 // Let's disable it to prevent starting a new recording during fetch.
+                 voiceInputBtn.disabled = isLoading;
+             }
         }
     }
 
@@ -133,6 +220,16 @@ document.addEventListener('DOMContentLoaded', () => {
                  currentQuestionNumber = 0;
                  messageIndex = 0; // Reset message index for animation
                  updateProgress(0, totalQuestions); // Reset progress
+                 // Ensure voice button visibility is correct on section switch
+                 if (voiceInputBtn) {
+                     voiceInputBtn.style.display = SpeechRecognition ? '' : 'none'; // Show if supported
+                     voiceInputBtn.disabled = false; // Re-enable voice button
+                     voiceInputBtn.classList.remove('recording'); // Reset recording state styling
+                     voiceInputBtn.innerHTML = '<i class="fas fa-microphone"></i> Ghi âm'; // Reset text
+                      if (isRecording) { // Stop any active recording if switching sections
+                         speechRecognition.stop();
+                      }
+                 }
 
 
             } else if (agentType === 'research') {
@@ -142,6 +239,13 @@ document.addEventListener('DOMContentLoaded', () => {
                  researchResult.classList.add('hidden');
                  researchReportContentDiv.innerHTML = '';
                  researchTopicInput.value = '';
+                  // Hide voice button if switching to research section
+                  if (voiceInputBtn) {
+                     voiceInputBtn.style.display = 'none';
+                  }
+                  // Ensure interview inputs are re-enabled if user switches mid-interview
+                   userAnswerTextarea.disabled = false;
+                   submitAnswerBtn.disabled = false;
             }
         });
     });
@@ -197,11 +301,22 @@ document.addEventListener('DOMContentLoaded', () => {
                 totalQuestions = data.total_questions;
                 updateProgress(currentQuestionNumber, totalQuestions);
                 appendMessageToLog('question', `Câu hỏi ${currentQuestionNumber}: ${data.question}`);
+
+                 // Re-enable inputs and voice button after receiving the first question
+                 userAnswerTextarea.disabled = false;
+                 submitAnswerBtn.disabled = false;
+                 if (voiceInputBtn) voiceInputBtn.disabled = false;
+                 userAnswerTextarea.focus(); // Focus textarea for typing or recording
+
             } else {
                  displayError(`Lỗi bắt đầu phỏng vấn: ${data.error || response.statusText}`);
                  // Revert to setup if start fails
                  interviewSetup.classList.remove('hidden');
                  interviewActive.classList.add('hidden');
+                 // Re-enable start button
+                 startInterviewBtn.disabled = false;
+                 // Hide voice button if section is hidden
+                 if (voiceInputBtn) voiceInputBtn.style.display = 'none';
             }
         } catch (error) {
             console.error('Error starting interview:', error);
@@ -209,149 +324,168 @@ document.addEventListener('DOMContentLoaded', () => {
              // Revert to setup if start fails
              interviewSetup.classList.remove('hidden');
              interviewActive.classList.add('hidden');
+              // Re-enable start button
+             startInterviewBtn.disabled = false;
+              // Hide voice button if section is hidden
+              if (voiceInputBtn) voiceInputBtn.style.display = 'none';
         } finally {
-            showLoading(false, 'interview');
+            // showLoading(false, 'interview'); // Loading is hidden when inputs are re-enabled
         }
     });
 
-    submitAnswerBtn.addEventListener('click', async () => {
-        const userAnswer = userAnswerTextarea.value.trim();
-        if (!userAnswer) {
-            displayError('Vui lòng nhập câu trả lời của bạn.');
-            return;
-        }
+    // Function to handle sending answer (used by button click and Enter key)
+    async function sendAnswer() {
+         const userAnswer = userAnswerTextarea.value.trim();
+         if (!userAnswer) {
+             displayError('Vui lòng nhập câu trả lời của bạn.');
+             userAnswerTextarea.focus(); // Focus back to input
+             return;
+         }
 
-        hideError();
-        appendMessageToLog('answer', userAnswer);
-        userAnswerTextarea.value = ''; // Clear input after sending
-        showLoading(true, 'interview');
-        // Disable input area temporarily
-        userAnswerTextarea.disabled = true;
-        submitAnswerBtn.disabled = true;
-
-
-        try {
-            const response = await fetch(`${BACKEND_URL}/interview/answer`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ answer: userAnswer }),
-            });
-
-            const data = await response.json();
-
-            if (response.ok) {
-                // Add feedback first
-                appendMessageToLog('feedback', `Phản hồi: ${data.feedback}`);
-
-                if (data.status === 'continue') {
-                    currentQuestionNumber++;
-                    updateProgress(currentQuestionNumber, totalQuestions);
-                    // Add next question after a slight delay to improve chat flow feel
-                    setTimeout(() => {
-                         appendMessageToLog('question', `Câu hỏi ${currentQuestionNumber}: ${data.next_question}`);
-                         // Re-enable input area after receiving next question
-                         userAnswerTextarea.disabled = false;
-                         submitAnswerBtn.disabled = false;
-                         userAnswerTextarea.focus(); // Focus textarea
-                    }, 500); // 500ms delay
-                } else if (data.status === 'finished') {
-                    updateProgress(totalQuestions, totalQuestions); // Complete progress bar
-                    questionCount.textContent = "Phỏng vấn hoàn thành!"; // Update text
-                    submitAnswerBtn.classList.add('hidden'); // Hide submit button
-                    userAnswerTextarea.classList.add('hidden'); // Hide textarea
-                    interviewActive.querySelector('.user-input-area').classList.add('hidden'); // Hide input area
+         hideError();
+         appendMessageToLog('answer', userAnswer);
+         userAnswerTextarea.value = ''; // Clear input after sending
+         showLoading(true, 'interview');
+         // Disable input area and buttons temporarily
+         userAnswerTextarea.disabled = true;
+         submitAnswerBtn.disabled = true;
+         if (voiceInputBtn) voiceInputBtn.disabled = true;
 
 
-                    interviewResultDiv.classList.remove('hidden');
-                    // Render summary with Markdown
-                    finalSummaryDiv.innerHTML = `<strong>Tóm tắt:</strong> ${renderMarkdown(data.final_summary, false)}`; // Use block rendering for summary
-                    finalScoreDiv.innerHTML = `<strong>Điểm số cuối cùng:</strong> <span class="final-score-value">${data.final_score}</span>`;
+         try {
+             const response = await fetch(`${BACKEND_URL}/interview/answer`, {
+                 method: 'POST',
+                 headers: {
+                     'Content-Type': 'application/json',
+                 },
+                 body: JSON.stringify({ answer: userAnswer }),
+             });
 
-                }
-            } else {
-                displayError(`Lỗi xử lý câu trả lời: ${data.error || response.statusText}`);
-                 // Keep disabled on critical error
-                 // submitAnswerBtn.disabled = true; // Already done before fetch
-                 // userAnswerTextarea.disabled = true; // Already done before fetch
-            }
-        } catch (error) {
-            console.error('Error submitting answer:', error);
-            displayError(`Lỗi kết nối đến server: ${error.message}`);
-            // Keep disabled on connection error
-            // submitAnswerBtn.disabled = true; // Already done before fetch
-            // userAnswerTextarea.disabled = true; // Already done before fetch
-        } finally {
-            // showLoading(false, 'interview'); // Loading hidden here as inputs might stay disabled on error
-             if (data && data.status !== 'continue') { // Only hide loading if not waiting for next question
-                  showLoading(false, 'interview');
+             const data = await response.json();
+
+             if (response.ok) {
+                 // Add feedback first
+                 appendMessageToLog('feedback', `Phản hồi: ${data.feedback}`);
+
+                 if (data.status === 'continue') {
+                     currentQuestionNumber++;
+                     updateProgress(currentQuestionNumber, totalQuestions);
+                     // Add next question after a slight delay to improve chat flow feel
+                     setTimeout(() => {
+                          appendMessageToLog('question', `Câu hỏi ${currentQuestionNumber}: ${data.next_question}`);
+                          // Re-enable input area and buttons after receiving next question
+                          userAnswerTextarea.disabled = false;
+                          submitAnswerBtn.disabled = false;
+                           if (voiceInputBtn) voiceInputBtn.disabled = false;
+                          userAnswerTextarea.focus(); // Focus textarea
+                          showLoading(false, 'interview'); // Hide loading
+                     }, 500); // 500ms delay
+                 } else if (data.status === 'finished') {
+                     updateProgress(totalQuestions, totalQuestions); // Complete progress bar
+                     questionCount.textContent = "Phỏng vấn hoàn thành!"; // Update text
+                     submitAnswerBtn.classList.add('hidden'); // Hide submit button
+                     userAnswerTextarea.classList.add('hidden'); // Hide textarea
+                     interviewActive.querySelector('.user-input-area').classList.add('hidden'); // Hide input area
+                     if (voiceInputBtn) voiceInputBtn.classList.add('hidden'); // Hide voice button
+
+
+                     interviewResultDiv.classList.remove('hidden');
+                     // Render summary with Markdown
+                     finalSummaryDiv.innerHTML = `<strong>Tóm tắt:</strong> ${renderMarkdown(data.final_summary, false)}`; // Use block rendering for summary
+                     finalScoreDiv.innerHTML = `<strong>Điểm số cuối cùng:</strong> <span class="final-score-value">${data.final_score}</span>`;
+                     showLoading(false, 'interview'); // Hide loading
+
+                 }
+             } else {
+                 displayError(`Lỗi xử lý câu trả lời: ${data.error || response.statusText}`);
+                 // Keep disabled on critical error or allow retrying?
+                 // For now, keep disabled to avoid multiple requests
+                  userAnswerTextarea.disabled = true;
+                  submitAnswerBtn.disabled = true;
+                  if (voiceInputBtn) voiceInputBtn.disabled = true;
+                  showLoading(false, 'interview'); // Hide loading
              }
-             // If error occurred, inputs remain disabled, loading stays hidden by displayError logic
-        }
-    });
+         } catch (error) {
+             console.error('Error submitting answer:', error);
+             displayError(`Lỗi kết nối đến server: ${error.message}`);
+             // Keep disabled on connection error
+             userAnswerTextarea.disabled = true;
+             submitAnswerBtn.disabled = true;
+              if (voiceInputBtn) voiceInputBtn.disabled = true;
+              showLoading(false, 'interview'); // Hide loading
+         }
+    }
 
 
-    startResearchBtn.addEventListener('click', async () => {
-        const researchTopic = researchTopicInput.value.trim();
-        if (!researchTopic) {
-            displayError('Vui lòng nhập chủ đề nghiên cứu.');
-            return;
-        }
-
-        hideError();
-        researchResult.classList.remove('hidden'); // Show result area
-        researchReportContentDiv.innerHTML = ''; // Clear previous report
-        showLoading(true, 'research');
+    submitAnswerBtn.addEventListener('click', sendAnswer);
 
 
-        try {
-            const response = await fetch(`${BACKEND_URL}/research`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ topic: researchTopic }),
-            });
+    // Function to handle starting research (used by button click and Enter key)
+     async function startResearch() {
+         const researchTopic = researchTopicInput.value.trim();
+         if (!researchTopic) {
+             displayError('Vui lòng nhập chủ đề nghiên cứu.');
+              researchTopicInput.focus(); // Focus back to input
+             return;
+         }
 
-            const data = await response.json();
+         hideError();
+         researchResult.classList.remove('hidden'); // Show result area
+         researchReportContentDiv.innerHTML = ''; // Clear previous report
+         showLoading(true, 'research');
 
-            if (response.ok) {
-                // Render report with Markdown
-                researchReportContentDiv.innerHTML = renderMarkdown(data.report, false); // Use block rendering for report
-                researchReportContentDiv.style.color = 'var(--text-color)'; // Reset color in case of previous error
-            } else {
-                 researchReportContentDiv.innerHTML = `Không thể tạo báo cáo. ${renderMarkdown(data.error || response.statusText, false)}`; // Render error report with Markdown
-                 researchReportContentDiv.style.color = 'var(--error-color)'; // Indicate error visually
-                 displayError(`Lỗi nghiên cứu: ${data.error || response.statusText}`);
-            }
-        } catch (error) {
-            console.error('Error performing research:', error);
-             researchReportContentContentDiv.innerHTML = `Đã xảy ra lỗi kết nối. ${renderMarkdown(error.message, false)}`; // Render error report with Markdown
-             researchReportContentDiv.style.color = 'var(--error-color)'; // Indicate error visually
-            displayError(`Lỗi kết nối đến server: ${error.message}`);
-        } finally {
-            showLoading(false, 'research');
-        }
-    });
+
+         try {
+             const response = await fetch(`${BACKEND_URL}/research`, {
+                 method: 'POST',
+                 headers: {
+                     'Content-Type': 'application/json',
+                 },
+                 body: JSON.stringify({ topic: researchTopic }),
+             });
+
+             const data = await response.json();
+
+             if (response.ok) {
+                 // Render report with Markdown
+                 researchReportContentDiv.innerHTML = renderMarkdown(data.report, false); // Use block rendering for report
+                 researchReportContentDiv.style.color = 'var(--text-color)'; // Reset color in case of previous error
+             } else {
+                  researchReportContentDiv.innerHTML = `Không thể tạo báo cáo. ${renderMarkdown(data.error || response.statusText, false)}`; // Render error report with Markdown
+                  researchReportContentDiv.style.color = 'var(--error-color)'; // Indicate error visually
+                  displayError(`Lỗi nghiên cứu: ${data.error || response.statusText}`);
+             }
+         } catch (error) {
+             console.error('Error performing research:', error);
+              researchReportContentDiv.innerHTML = `Đã xảy ra lỗi kết nối. ${renderMarkdown(error.message, false)}`; // Render error report with Markdown
+              researchReportContentDiv.style.color = 'var(--error-color)'; // Indicate error visually
+             displayError(`Lỗi kết nối đến server: ${error.message}`);
+         } finally {
+             showLoading(false, 'research');
+         }
+     }
+
+
+    startResearchBtn.addEventListener('click', startResearch);
 
     // --- Add Enter key listeners ---
 
     // Interview answer textarea: Enter sends, Shift+Enter is newline
     userAnswerTextarea.addEventListener('keydown', (event) => {
-        // Check if Enter key is pressed AND Shift key is NOT pressed
-        if (event.key === 'Enter' && !event.shiftKey) {
+        // Check if Enter key is pressed AND Shift key is NOT pressed AND submit button is not disabled
+        if (event.key === 'Enter' && !event.shiftKey && !submitAnswerBtn.disabled) {
             event.preventDefault(); // Prevent default newline
-            submitAnswerBtn.click(); // Trigger button click
+            sendAnswer(); // Call the send function
         }
+        // If Shift+Enter is pressed, do nothing (default newline occurs)
     });
 
     // Research topic input: Enter triggers search
     researchTopicInput.addEventListener('keydown', (event) => {
-        // Check if Enter key is pressed
-        if (event.key === 'Enter') {
+        // Check if Enter key is pressed AND start button is not disabled
+        if (event.key === 'Enter' && !startResearchBtn.disabled) {
             event.preventDefault(); // Prevent default (e.g., form submission if applicable)
-            startResearchBtn.click(); // Trigger button click
+            startResearch(); // Call the start research function
         }
     });
 
@@ -365,6 +499,11 @@ document.addEventListener('DOMContentLoaded', () => {
          // Optionally, simulate click on first button to show its section by default
          // agentButtons[0].click(); // Uncomment if you want a section to show immediately
     }
+
+    // Hide voice button initially until interview section is active
+     if (voiceInputBtn) {
+        voiceInputBtn.style.display = 'none';
+     }
 
 
 });
